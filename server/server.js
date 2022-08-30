@@ -37,6 +37,7 @@ io.on('connection', (socket) => {
     // join a room and listens for room sent from client
     socket.on("join_room", (data) => {
         socket.join(data);
+        console.log(`User with ID: ${socket.id} joined room: ${data}`);
     });
 
     socket.on("send_message", (data) => { // from send message funct on client
@@ -44,6 +45,11 @@ io.on('connection', (socket) => {
         socket.to(data.room).emit("receive_message", data); // specify room and then send msg
         // socket.to(data.room).emit("receive_message", data);
     });
+
+    socket.on("disconnect", () => {
+        console.log("User Disconnected", socket.id);
+    });
+
 });
 /* socket.broadcast will emit to all other clients besides the client who is actually emitting
         Other events: 

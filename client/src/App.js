@@ -12,77 +12,33 @@ function App() {
   // notice that we pass a callback function to initialize the socket
   // we don't need to destructure the 'setSocket' function since we won't be updating the socket state
   const [socket] = useState(() => io(':8000'));
-  
-  //Room State
+
+  // create username and room use state vars
+  const [username , setUsername] = useState("");
   const [room, setRoom] = useState("");
+  const [showChat, setShowChat] = useState(false);
 
-  // Messages States
-  const [message, setMessage] = useState("");
-  const [messageReceived, setMessageReceived] = useState("");
-
-  // const [messagesList, setMessageList] = useState([]); // displays all messages
-
-  // useEffect(() => {
-  //   // we need to set up all of our event listeners
-  //   // in the useEffect callback function
-  //   console.log('Is this running?');
-  //   socket.on('Welcome', data => console.log(data));
-
-  //   // note that we're returning a callback function
-  //   // this ensures that the underlying socket will be closed if App is unmounted
-  //   // this would be more critical if we were creating the socket in a subcomponent
-  //   return () => socket.disconnect(true);
-  // }, [socket]);
-
+  // join room and show chat
   const joinRoom = () => {
-    if (room !== "") {
+    if (username !== "" && room !== "") {
       socket.emit("join_room", room);
+      setShowChat(true);
     }
   };
-
-  const sendMessage = () => {
-    socket.emit("send_message", { message, room });
-  };
-
-  useEffect(() => {
-    socket.on("receive_message", (data) => {
-      // alert(data.message),
-      // setMessageList((list)=> {
-      //   // console.log(data)
-      //   return [...list, data];
-      // })
-      setMessageReceived(data.message)
-    }
-
-    );
-
-    // this ensures that the underlying socket will be closed if App is unmounted
-    // this would be more critical if we were creating the socket in a subcomponent
-    // return () => socket.disconnect(true);
-  }, [socket]);
-
 
   return (
     <div className="App">
-      <h1>Socket Test</h1>
-      <Chat />
-      <input
-        placeholder="Room Number..."
-        onChange={(event) => {
-          setRoom(event.target.value);
-        }}
-      />
-      <button onClick={joinRoom}> Join Room</button>
-      <br/>
-      <input
-        placeholder="Message..."
-        onChange={(event) => {
-          setMessage(event.target.value);
-        }}
-      />
-      <button onClick={sendMessage}> Send Message</button>
-      <h1> Message:</h1>
-      {messageReceived}
+      {!showChat ? (
+        <div>
+          <h3>Join A Chat</h3>
+          <input type="text" placeholder="Enter Name..." onChange={(event) => { setUsername(event.target.value); }} />
+          <input type="text" placeholder="Room ID..." onChange={(event) => { setRoom(event.target.value); }} /> 
+          <button onClick={joinRoom}>Join A Room</button>
+        </div>
+      ) : (
+        <Chat socket={socket} username={username} room={room} />
+      )}
+      
     </div>
   );
 }
